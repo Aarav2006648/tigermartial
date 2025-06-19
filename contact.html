@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact - Tiger Martial Arts</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="classes.html">Classes</a>
+    <a href="courses.html">Courses</a>
+    <a href="membership.html">Membership</a>
+    <a href="timetable.html">Timetable</a>
+    <a href="instructors.html">Instructors</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <section class="section">
+    <h2>Create an Account</h2>
+    <div class="form1">
+      <input type="text" id="full_name" placeholder="Full Name" required />
+      <input type="email" id="email" placeholder="Email Address" required />
+      <input type="password" id="password" placeholder="Create Password" required />
+      <button onclick="register()">Sign Up</button>
+      <button onclick="login()">Sign In</button>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Tiger Martial Arts. All rights reserved.</p>
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+  <script>
+    // ✅ Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyCvCN6M4kUwT4-Vz8uuwYoWnMI8v3_L-xc",
+      authDomain: "login-3a3da.firebaseapp.com",
+      databaseURL: "https://login-3a3da-default-rtdb.firebaseio.com",
+      projectId: "login-3a3da",
+      storageBucket: "login-3a3da.appspot.com",
+      messagingSenderId: "658760034140",
+      appId: "1:658760034140:web:6f07ca9b48ed1793634399"
+    };
+
+    // ✅ Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // ✅ Register function
+    function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const full_name = document.getElementById('full_name').value;
+
+      if (!validate_email(email) || !validate_password(password)) {
+        alert('Email or Password is invalid!');
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          const user = auth.currentUser;
+          const user_data = {
+            email: email,
+            full_name: full_name,
+            last_login: Date.now()
+          };
+          database.ref('users/' + user.uid).set(user_data);
+          alert('User Created!!');
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    }
+
+    // ✅ Login function
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!validate_email(email) || !validate_password(password)) {
+        alert('Email or Password is invalid!');
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          const user = auth.currentUser;
+          const database_ref = database.ref();
+
+          const user_data = {
+            last_login: Date.now()
+          };
+
+          database_ref.child('users/' + user.uid).update(user_data);
+
+          // 🔍 Fetch full name and redirect
+          database.ref('users/' + user.uid).once('value').then(function(snapshot) {
+            const full_name = snapshot.val().full_name;
+            alert("User is logged in");
+          window.location.href = "dashboard.html?name=" + encodeURIComponent(full_name) + "&uid=" + user.uid;
+          });
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    }
+
+    // ✅ Validation functions
+    function validate_email(email) {
+      const expression = /^[^@]+@\w+(\.\w+)+\w$/;
+      return expression.test(email);
+    }
+
+    function validate_password(password) {
+      return password.length >= 6;
+    }
+
+    function validate_field(field) {
+      return field != null && field.length > 0;
+    }
+  </script>
+</body>
+</html>
