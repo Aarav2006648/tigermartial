@@ -114,6 +114,14 @@ header p {
   border-radius: 8px;
 }
 
+.feature-full img {
+  width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #eee;
+  display: block;
+}
+
 .feature h3 {
   margin-top: 15px;
 }
